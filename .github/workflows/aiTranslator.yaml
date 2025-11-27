@@ -47,7 +47,7 @@ jobs:
           -H "Authorization: Bearer ${{ steps.get-token.outputs.TOKEN }}" \
           -H "Content-Type: application/json" \
           -H "Ocp-Apim-Subscription-Region: eastus" \
-          -H "Ocp-Apim-ResourceId: "/subscriptions/2cab150b-4433-4b0e-95a8-fabb980b3485/resourceGroups/myRG/providers/Microsoft.CognitiveServices/accounts/aitranslatorpn7qikovfvu32" \
+          -H "Ocp-Apim-ResourceId: /subscriptions/2cab150b-4433-4b0e-95a8-fabb980b3485/resourceGroups/myRG/providers/Microsoft.CognitiveServices/accounts/aitranslatorpn7qikovfvu32" \
           --data-raw '[{"text":"Hello, world!"}]' | json_pp
 
 
