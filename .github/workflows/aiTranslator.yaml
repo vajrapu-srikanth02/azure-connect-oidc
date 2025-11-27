@@ -38,7 +38,7 @@ jobs:
       
       - name: Call the API
         run: |
-          curl -v -X POST "https://${{ secrets.AZURE_TRANSLATOR_ENDPOINT }}/translate?api-version=3.0&to=fr" \
+          curl -v -X POST "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=fr" \
           -H "Authorization: Bearer ${{ steps.get-token.outputs.TOKEN }}" \
           -H "Content-Type: application/json" \
           --data-raw '[{"text":"Hello, world!"}]' | json_pp
