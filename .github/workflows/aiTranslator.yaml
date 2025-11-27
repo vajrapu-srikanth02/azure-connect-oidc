@@ -41,6 +41,7 @@ jobs:
           curl -v -X POST "https://aitranslatorpn7qikovfvu32.cognitiveservices.azure.com/translate?api-version=3.0&to=fr" \
           -H "Authorization: Bearer ${{ steps.get-token.outputs.TOKEN }}" \
           -H "Content-Type: application/json" \
+          -H "Ocp-Apim-Subscription-Region: eastus" \
           --data-raw '[{"text":"Hello, world!"}]' | json_pp
 
 
