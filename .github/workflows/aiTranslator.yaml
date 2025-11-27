@@ -1,0 +1,56 @@
+name: AI Translator
+on:
+  push:
+    paths:
+      - 'AI Translator/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    environment: myRG
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install axios cheerio glob
+      
+      - name: Azure Login with SPN
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CREDENTIALS }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Get OAuth Token for Translator
+        id: get-token
+        run: |
+          TOKEN=$(az account get-access-token --resource https://cognitiveservices.azure.com/ --query accessToken --output tsv)
+          echo "TOKEN=$TOKEN" >> $GITHUB_OUTPUT
+      
+      - name: Call the API
+        run: |
+          curl -v -X POST "https://${{ secrets.AZURE_TRANSLATOR_ENDPOINT }}/translate?api-version=3.0&to=fr" \
+          -H "Authorization: Bearer ${{ steps.get-token.outputs.TOKEN }}" \
+          -H "Content-Type: application/json" \
+          --data-raw '[{"text":"Hello, world!"}]' | json_pp
+
+
+      # - name: Run Translation Script
+      #   run: node aitranslate.js
+      #   env:
+      #     AZURE_TRANSLATOR_TOKEN: ${{ steps.get-token.outputs.TOKEN }}
+      #     AZURE_TRANSLATOR_ENDPOINT: ${{ secrets.AZURE_TRANSLATOR_ENDPOINT }}
+      
+      # - name: Verify translated files
+      #   run: |
+      #     echo "Translated files:"
+      #     run: node verify.js
