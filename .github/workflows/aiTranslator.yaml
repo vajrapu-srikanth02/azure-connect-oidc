@@ -29,8 +29,8 @@ jobs:
       #     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
       - name: add entry in hosts
         run: |
-          echo 172.19.1.4 aitranslatorpn7qikovfvu32.cognitiveservices.azure.com >> /etc/hosts
-          cat /etc/hosts
+          sudo echo "172.19.1.4 aitranslatorpn7qikovfvu32.cognitiveservices.azure.com" >> /etc/hosts
+          sudo cat /etc/hosts
 
       - name: Azure CLI Login
         uses: azure/login@v2
