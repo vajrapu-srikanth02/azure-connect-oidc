@@ -110,9 +110,9 @@ jobs:
 
             if [[ "$STATE" == "VM running" ]]; then 
                echo "Stopping VM $VM_NAME" 
-               az vm deallocate \ 
-               --name $VM_NAME \ 
-               --resource-group ${{ github.event.inputs.resource_group }} 
+               az vm deallocate \
+               --name $VM_NAME \
+               --resource-group ${{ github.event.inputs.resource_group }}
             else 
                echo "VM $VM_NAME already stopped" 
             fi 
