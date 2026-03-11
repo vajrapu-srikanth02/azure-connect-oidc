@@ -56,6 +56,8 @@ jobs:
       matrix: 
         include: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }} 
         
+    permissions:
+      id-token: write # Require write permission to Fetch an OIDC token.   
     steps: 
       - name: Azure CLI Login
         uses: azure/login@v2
