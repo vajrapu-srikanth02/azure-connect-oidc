@@ -5,8 +5,8 @@ on:
       vm_ids:
         description: "Comma separated VM number suffixes (example: 11,12,13)"
         required: true
-      stop_time:
-        description: "Stop time in UTC (example: 2026-03-12T18:00:00)" 
+      stop_time_ist:
+        description: "Stop time in IST (example: 2026-03-12 06:56)" 
         required: true 
       resource_group:
         description: "Azure Resource Group" 
@@ -57,9 +57,23 @@ jobs:
       - name: Check time and stop VM if needed
         run: | 
           VM_NAME="VajSri1234${{ matrix.id }}D"
-          STOP_TIME="${{ github.event.inputs.stop_time }}"
+          STOP_TIME_IST="${{ github.event.inputs.stop_time_ist }}"
+          echo "Entered IST time: $STOP_TIME_IST"
+
+          # Convert IST to UTC 
+          STOP_TIME_UTC=$(date -d "$STOP_TIME_IST IST -5 hours -30 minutes" +"%Y-%m-%d %H:%M:%S")
+          
+          echo "Converted UTC time: $STOP_TIME_UTC"
+
+          # Convert UTC to epoch 
+          STOP_EPOCH=$(date -d "$STOP_TIME_UTC" +%s) 
+          
+          # Current UTC epoch 
+          CURRENT_EPOCH=$(date -u +%s)
+
           echo "Current time epoch: $CURRENT_EPOCH" 
           echo "Stop time epoch: $STOP_EPOCH"
+        
           if [ $CURRENT_EPOCH -ge $STOP_EPOCH ]; then
             echo "Time condition met. Checking VM state..."
             STATE=$(az vm get-instance-view \ 
