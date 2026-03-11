@@ -76,9 +76,9 @@ jobs:
           
       - name: Check time and stop VM if needed
         run: | 
-          echo "Matrix ID: ${{ matrix.id }}"
+          echo "Matrix ID: ${{ matrix.vm_id }}"
           
-          VM_NAME="VajSri1234${{ matrix.id }}D"
+          VM_NAME="VajSri1234${{ matrix.vm_id }}D"
           echo "VM NAME: $VM_NAME"
           
           STOP_TIME_IST="${{ github.event.inputs.stop_time_ist }}"
