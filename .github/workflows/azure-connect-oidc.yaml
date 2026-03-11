@@ -44,7 +44,7 @@ jobs:
         id: set-matrix 
         run: | 
           IDS="${{ github.event.inputs.vm_ids }}" 
-          JSON=$(echo $IDS | jq -R -s -c 'split(",") | map({vm_id: .})') 
+          JSON=$(echo "$IDS" | jq -R -s -c 'split(",") | map(gsub("\\n";"") | {vm_id: .})')
           echo "matrix=$JSON" >> $GITHUB_OUTPUT
   
   stop-vms: 
