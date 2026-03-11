@@ -1,6 +1,16 @@
 name: Run Azure CLI Login with OpenID Connect
 on: 
   workflow_dispatch:
+    inputs: 
+      vm_ids:
+        description: "Comma separated VM number suffixes (example: 11,12,13)"
+        required: true
+      stop_time:
+        description: "Stop time in UTC (example: 2026-03-12T18:00:00)" 
+        required: true 
+      resource_group:
+        description: "Azure Resource Group" 
+        required: true
      
 jobs: 
   test:
@@ -23,3 +33,68 @@ jobs:
         inlineScript: |
           az account show
           # You can write your Azure CLI inline scripts here.
+  
+  prepare-matrix: 
+    runs-on: ubuntu-latest 
+    outputs: 
+      matrix: ${{ steps.set-matrix.outputs.matrix }} 
+    steps: 
+      - name: Convert VM IDs to matrix 
+        id: set-matrix 
+        run: | 
+          IDS="${{ github.event.inputs.vm_ids }}" 
+          JSON=$(echo $IDS | jq -R -s -c 'split(",") | map({vm_id: .})') 
+          echo "matrix=$JSON" >> $GITHUB_OUTPUT
+  
+  stop-vms: 
+    needs: prepare-matrix 
+    runs-on: ubuntu-latest 
+    strategy: 
+      matrix: 
+        include: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }} 
+    
+    steps: 
+      - name: Check time and stop VM if needed
+        run: | 
+          VM_NAME="VajSri1234${{ matrix.id }}D"
+          STOP_TIME="${{ github.event.inputs.stop_time }}"
+          echo "Current time epoch: $CURRENT_EPOCH" 
+          echo "Stop time epoch: $STOP_EPOCH"
+          if [ $CURRENT_EPOCH -ge $STOP_EPOCH ]; then
+            echo "Time condition met. Checking VM state..."
+            STATE=$(az vm get-instance-view \ 
+              --name $VM_NAME \ 
+              --resource-group ${{ github.event.inputs.resource_group }} \ 
+              --query "instanceView.statuses[?starts_with(code, 'PowerState/')].displayStatus" \ 
+              -o tsv)
+            echo "VM state: $STATE"
+
+            if [[ "$STATE" == "VM running" ]]; then 
+               echo "Stopping VM $VM_NAME" 
+               az vm deallocate \ 
+               --name $VM_NAME \ 
+               --resource-group ${{ github.event.inputs.resource_group }} 
+            else 
+               echo "VM $VM_NAME already stopped" 
+            fi 
+          else 
+            echo "Stop time not reached yet. Skipping..." 
+          fi
+            
+      #     TARGET="${{ github.event.inputs.stop_time }}" 
+      #     TARGET_EPOCH=$(date -d "$TARGET" +%s) 
+      #     NOW_EPOCH=$(date +%s) 
+      #     if [ $NOW_EPOCH -lt $TARGET_EPOCH ]; then 
+      #       SLEEP_SEC=$((TARGET_EPOCH - NOW_EPOCH)) 
+      #       echo "Sleeping for $SLEEP_SEC seconds until stop time..." 
+      #       sleep $SLEEP_SEC 
+      #     else 
+      #       echo "Stop time already reached. Continuing..." 
+      #     fi 
+      # - name: Stop VM 
+      #   run: | 
+      #     VM_NAME="VajSri1234${{ matrix.vm_id }}D" 
+      #     echo "Stopping VM: $VM_NAME" 
+      #     az vm deallocate \ 
+      #     --name $VM_NAME \ 
+      #     --resource-group ${{ github.event.inputs.resource_group }}
