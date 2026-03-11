@@ -79,7 +79,7 @@ jobs:
             STATE=$(az vm get-instance-view \ 
               --name $VM_NAME \ 
               --resource-group ${{ github.event.inputs.resource_group }} \ 
-              --query "instanceView.statuses[?starts_with(code, 'PowerState/')].displayStatus" \ 
+              --query "instanceView.statuses[?starts_with(code, 'PowerState/')].displayStatus" \
               -o tsv)
             echo "VM state: $STATE"
 
