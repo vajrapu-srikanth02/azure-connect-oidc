@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - main
-
 jobs:
   helm:
-    uses: 
+    uses:
     if:
     with:
       chart_name: altf-keycloak
       major_version: '26'
-      minor_version: '01'
+      minor_version: '02'
