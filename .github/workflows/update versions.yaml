@@ -119,13 +119,13 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PATS }}
           script: |
-            const prNumber = ${{ needs.update.outputs.pr_number }};
+            const prNumber = "${{ needs.update.outputs.pr_number }}";
             
             if (!prNumber) {
               core.setFailed("PR number not found");
               return;
             }
-              
+
             console.log("Merging PR:", prNumber);
 
             await github.rest.pulls.merge({
