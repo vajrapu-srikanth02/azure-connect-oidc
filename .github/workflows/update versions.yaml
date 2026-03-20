@@ -95,18 +95,43 @@ jobs:
             echo "Changes detected"
           fi
 
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GH_PATS }}
-          branch: update-altf-versions
-          title: "Update altf workflow versions"
-          commit-message: "Update major_version and minor_version"
-          body: |
-            This PR updates:
-            - major_version → ${{ github.event.inputs.major_version }}
-            - minor_version → ${{ github.event.inputs.minor_version }}
+      - name: Create branch, commit and push
+        if: steps.diff.outputs.changes == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git checkout -b update-altf-versions
+          git add .
+          git commit -m "Update major/minor versions"
+
+          git push origin update-altf-versions --force
+        env:
+          GH_TOKEN: ${{ secrets.GH_PATS }}
+
+      - name: Create PR using GitHub CLI
+        if: steps.diff.outputs.changes == 'true'
+        run: |
+          gh pr create \
+            --title "Update altf workflow versions" \
+            --body "Updated major_version=${{ inputs.major_version }}, minor_version=${{ inputs.minor_version }}" \
+            --head update-altf-versions \
+            --base main
+        env:
+          GH_TOKEN: ${{ secrets.GH_PATS }}
+
+      # - name: Create Pull Request
+      #   id: cpr
+      #   uses: peter-evans/create-pull-request@v6
+      #   with:
+      #     token: ${{ secrets.GH_PATS }}
+      #     branch: update-altf-versions
+      #     title: "Update altf workflow versions"
+      #     commit-message: "Update major_version and minor_version"
+      #     body: |
+      #       This PR updates:
+      #       - major_version → ${{ github.event.inputs.major_version }}
+      #       - minor_version → ${{ github.event.inputs.minor_version }}
 
   approval:
     runs-on: ubuntu-latest
