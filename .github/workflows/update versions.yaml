@@ -82,7 +82,7 @@ jobs:
           for file in .github/workflows/${{ inputs.file }}; do
             echo "Updating $file"
 
-            yq -i '
+            yq -i --prettyPrint '
               (.jobs[]?.with.major_version) = "'"${{ github.event.inputs.major_version }}"'" |
               (.jobs[]?.with.minor_version) = "'"${{ github.event.inputs.minor_version }}"'"
             ' "$file"
