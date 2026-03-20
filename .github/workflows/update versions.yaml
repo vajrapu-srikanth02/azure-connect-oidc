@@ -127,6 +127,12 @@ jobs:
     # if: needs.update.outputs.changes == 'true'
 
     steps:
+      - name: Checkout repo   # 👈 REQUIRED
+        uses: actions/checkout@v4
+        with:
+          ref: update-altf-versions
+          token: ${{ secrets.GH_PATS }}
+
       - name: Get PR number
         id: getpr
         run: |
