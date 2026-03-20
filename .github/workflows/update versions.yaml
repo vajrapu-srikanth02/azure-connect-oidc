@@ -61,7 +61,8 @@ on:
         description: enter file name
 permissions:
   contents: write
-  # actions: write
+env:
+  branch_name: 'update-altf-versions-${{ github.run_number }}'
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -101,11 +102,11 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git checkout -b update-altf-versions
+          git checkout -b ${{ env.branch_name }}
           git add .
           git commit -m "Update major/minor versions"
 
-          git push origin update-altf-versions --force
+          git push origin ${{ env.branch_name }}
         env:
           GH_TOKEN: ${{ secrets.GH_PATS }}
 
@@ -115,7 +116,7 @@ jobs:
           gh pr create \
             --title "Update altf workflow versions" \
             --body "Updated major_version=${{ inputs.major_version }}, minor_version=${{ inputs.minor_version }}" \
-            --head update-altf-versions \
+            --head ${{ env.branch_name }} \
             --base main
         env:
           GH_TOKEN: ${{ secrets.GH_PATS }}
@@ -125,7 +126,7 @@ jobs:
       #   uses: peter-evans/create-pull-request@v6
       #   with:
       #     token: ${{ secrets.GH_PATS }}
-      #     branch: update-altf-versions
+      #     branch: ${{ env.branch_name }}
       #     title: "Update altf workflow versions"
       #     commit-message: "Update major_version and minor_version"
       #     body: |
@@ -155,13 +156,13 @@ jobs:
       - name: Checkout repo   # 👈 REQUIRED
         uses: actions/checkout@v4
         with:
-          ref: update-altf-versions
+          ref: ${{ env.branch_name }}
           token: ${{ secrets.GH_PATS }}
 
       - name: Get PR number
         id: getpr
         run: |
-          PR=$(gh pr list --head update-altf-versions --json number -q '.[0].number')
+          PR=$(gh pr list --head ${{ env.branch_name }} --json number -q '.[0].number')
           echo "Found PR: $PR"
           echo "pr_number=$PR" >> $GITHUB_OUTPUT
         env:
