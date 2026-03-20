@@ -1,0 +1,15 @@
+name: altf-hello
+run-name: ${{ inputs.comments }}
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  helm:
+    uses: 
+    if:
+    with:
+      chart_name: altf-hello
+      major_version: '26'
+      minor_version: '01'
