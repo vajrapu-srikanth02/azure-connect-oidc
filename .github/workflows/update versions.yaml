@@ -76,7 +76,7 @@ jobs:
 
       - name: Update versions in altf workflows
         run: |
-          for file in .github/workflows/${{ inputs.file }}; do
+          for file in .github/workflows/altf-${{ inputs.file }}; do
             echo "Updating $file"
 
             sed -i "s/major_version: '[^']*'/major_version: '${{ github.event.inputs.major_version }}'/" "$file"
