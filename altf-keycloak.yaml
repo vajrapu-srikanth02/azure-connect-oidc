@@ -3,7 +3,7 @@ run-name: ${{ inputs.comments }}
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   helm:

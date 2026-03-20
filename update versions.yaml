@@ -1,0 +1,39 @@
+name: Update Versions in altf Workflows
+
+on:
+  workflow_dispatch:
+    inputs:
+      major_version:
+        description: "New Major Version"
+        required: true
+        default: "26"
+      minor_version:
+        description: "New Minor Version"
+        required: true
+        default: "01"
+
+jobs:
+  update-versions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        sparse-checkout: '.github/workflows'
+
+      - name: Update versions in altf workflows
+        run: |
+          for file in .github/workflows/altf-*.yaml; do
+            echo "Updating $file"
+
+            sed -i "s/major_version: '.*'/major_version: '${{ github.event.inputs.major_version }}'/g" "$file"
+            sed -i "s/minor_version: '.*'/minor_version: '${{ github.event.inputs.minor_version }}'/g" "$file"
+          done
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .github/workflows/altf-*.yaml
+          git commit -m "Update major/minor versions" || echo "No changes to commit"
+          git push
