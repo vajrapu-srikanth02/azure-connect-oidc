@@ -12,4 +12,4 @@ jobs:
     with:
       chart_name: altf-hello
       major_version: '26'
-      minor_version: '03'
+      minor_version: '01'
