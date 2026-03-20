@@ -1,42 +1,93 @@
-name: Update Versions in altf Workflows
+# name: Update Versions in altf Workflows
+
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       major_version:
+#         description: "New Major Version"
+#         required: true
+#         default: "26"
+#       minor_version:
+#         description: "New Minor Version"
+#         required: true
+#         default: "01"
+
+# permissions:
+#   contents: write
+#   workflows: write
+
+# jobs:
+#   update-versions:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v5
+
+
+#       - name: Update versions in altf workflows
+#         run: |
+#           for file in .github/workflows/altf-*.yaml; do
+#             echo "Updating $file"
+
+#             sed -i "s/major_version: '.*'/major_version: '${{ github.event.inputs.major_version }}'/g" "$file"
+#             sed -i "s/minor_version: '.*'/minor_version: '${{ github.event.inputs.minor_version }}'/g" "$file"
+#           done
+
+#       - name: Commit changes
+#         run: |
+#           git config user.name "github-actions"
+#           git config user.email "github-actions@github.com"
+#           git add .github/workflows/altf-*.yaml
+#           git commit -m "Update major/minor versions" || echo "No changes to commit"
+#           git push
+
+
+name: Update altf workflow versions
 
 on:
   workflow_dispatch:
     inputs:
       major_version:
-        description: "New Major Version"
+        description: "Major version"
         required: true
         default: "26"
       minor_version:
-        description: "New Minor Version"
+        description: "Minor version"
         required: true
         default: "01"
 
-permissions:
-  contents: write
-
 jobs:
-  update-versions:
+  update:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
 
       - name: Update versions in altf workflows
         run: |
           for file in .github/workflows/altf-*.yaml; do
             echo "Updating $file"
 
-            sed -i "s/major_version: '.*'/major_version: '${{ github.event.inputs.major_version }}'/g" "$file"
-            sed -i "s/minor_version: '.*'/minor_version: '${{ github.event.inputs.minor_version }}'/g" "$file"
+            yq -i '
+              (.jobs[]?.with.major_version) = "'"${{ github.event.inputs.major_version }}"'" |
+              (.jobs[]?.with.minor_version) = "'"${{ github.event.inputs.minor_version }}"'"
+            ' "$file"
           done
 
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add .github/workflows/altf-*.yaml
-          git commit -m "Update major/minor versions" || echo "No changes to commit"
-          git push
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: update-altf-versions
+          title: "Update altf workflow versions"
+          commit-message: "Update major_version and minor_version"
+          body: |
+            This PR updates:
+            - major_version → ${{ github.event.inputs.major_version }}
+            - minor_version → ${{ github.event.inputs.minor_version }}
