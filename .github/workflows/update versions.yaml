@@ -66,7 +66,7 @@ jobs:
   update:
     runs-on: ubuntu-latest
     outputs:
-      pr_number: ${{ steps.cpr.outputs.pull-request-number }}
+      pr_number: ${{ steps.diff.outputs.changes }}
 
     steps:
       - name: Checkout repo
@@ -84,6 +84,17 @@ jobs:
             cat .github/workflows/altf-keycloak.yaml
           done
 
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected"
+          fi
+
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v6
@@ -100,6 +111,7 @@ jobs:
   approval:
     runs-on: ubuntu-latest
     needs: update
+    if: needs.update.outputs.changes == 'true'
 
     environment:
       name: production   # 👈 create this in repo settings
@@ -112,25 +124,25 @@ jobs:
   merge:
     runs-on: ubuntu-latest
     needs: approval
+    if: needs.update.outputs.changes == 'true'
 
     steps:
+      - name: Get PR number
+        id: getpr
+        run: |
+          PR=$(gh pr list --head update-altf-versions --json number -q '.[0].number')
+          echo "Found PR: $PR"
+          echo "pr_number=$PR" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GH_PATS }}
+
       - name: Merge PR
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GH_PATS }}
-          script: |
-            const prNumber = "${{ needs.update.outputs.pr_number }}";
-            
-            if (!prNumber) {
-              core.setFailed("PR number not found");
-              return;
-            }
+        run: |
+          if [ -z "${{ steps.getpr.outputs.pr_number }}" ]; then
+            echo "No PR found. Skipping merge."
+            exit 0
+          fi
 
-            console.log("Merging PR:", prNumber);
-
-            await github.rest.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-              merge_method: "squash"
-            });
+          gh pr merge ${{ steps.getpr.outputs.pr_number }} --squash --admin
+        env:
+          GH_TOKEN: ${{ secrets.GH_PATS }}
