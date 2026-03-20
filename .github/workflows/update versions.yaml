@@ -139,5 +139,5 @@ jobs:
               merge_method: "squash"
             });
         env:
-          PR_NUMBER: ${{ needs.update.outputs.pr_number }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
 
