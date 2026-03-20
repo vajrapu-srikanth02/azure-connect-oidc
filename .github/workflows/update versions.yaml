@@ -69,6 +69,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PATS }}
 
       - name: Install yq
         run: |
@@ -90,7 +92,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: 
+          token: ${{ secrets.GH_PATS }}
           branch: update-altf-versions
           title: "Update altf workflow versions"
           commit-message: "Update major_version and minor_version"
