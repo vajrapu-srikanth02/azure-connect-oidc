@@ -56,6 +56,9 @@ on:
         description: "Minor version"
         required: true
         default: "01"
+      file:
+        required: true
+        description: enter file name
 permissions:
   contents: write
   actions: write
@@ -74,7 +77,7 @@ jobs:
 
       - name: Update versions in altf workflows
         run: |
-          for file in .github/workflows/altf-*.yaml; do
+          for file in .github/workflows/${{ inputs.file }}; do
             echo "Updating $file"
 
             yq -i '
@@ -87,6 +90,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
+          token: 
           branch: update-altf-versions
           title: "Update altf workflow versions"
           commit-message: "Update major_version and minor_version"
