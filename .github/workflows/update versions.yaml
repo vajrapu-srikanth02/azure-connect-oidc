@@ -127,16 +127,17 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PATS }}
           script: |
-            const prNumber = ${{ needs.update.outputs.pr_number }};
+            const prNumber = process.env.PR_NUMBER;
             if (!prNumber) {
               core.setFailed("PR number not found");
               return;
             }
-
             await github.rest.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: prNumber,
               merge_method: "squash"
             });
+        env:
+          PR_NUMBER: ${{ needs.update.outputs.pr_number }}
 
