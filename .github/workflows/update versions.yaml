@@ -83,20 +83,14 @@ jobs:
             ' "$file"
             cat .github/workflows/altf-keycloak.yaml
           done
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add .github/workflows/altf-*.yaml
-          git commit -m "Update major/minor versions" || echo "No changes to commit"
-          git push
-      # - name: Create Pull Request
-      #   uses: peter-evans/create-pull-request@v6
-      #   with:
-      #     branch: update-altf-versions
-      #     title: "Update altf workflow versions"
-      #     commit-message: "Update major_version and minor_version"
-      #     body: |
-      #       This PR updates:
-      #       - major_version → ${{ github.event.inputs.major_version }}
-      #       - minor_version → ${{ github.event.inputs.minor_version }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: update-altf-versions
+          title: "Update altf workflow versions"
+          commit-message: "Update major_version and minor_version"
+          body: |
+            This PR updates:
+            - major_version → ${{ github.event.inputs.major_version }}
+            - minor_version → ${{ github.event.inputs.minor_version }}
