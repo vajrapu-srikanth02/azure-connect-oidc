@@ -12,6 +12,9 @@ on:
         required: true
         default: "01"
 
+permissions:
+  contents: write
+
 jobs:
   update-versions:
     runs-on: ubuntu-latest
