@@ -82,10 +82,12 @@ jobs:
           for file in .github/workflows/${{ inputs.file }}; do
             echo "Updating $file"
 
-            yq -i --prettyPrint '
-              (.jobs[]?.with.major_version) = "'"${{ github.event.inputs.major_version }}"'" |
-              (.jobs[]?.with.minor_version) = "'"${{ github.event.inputs.minor_version }}"'"
-            ' "$file"
+            sed -i "s/major_version: '[^']*'/major_version: '${{ github.event.inputs.major_version }}'/" "$file"
+            sed -i "s/minor_version: '[^']*'/minor_version: '${{ github.event.inputs.minor_version }}'/" "$file"
+            # yq -i --prettyPrint '
+            #   (.jobs[]?.with.major_version) = "'"${{ github.event.inputs.major_version }}"'" |
+            #   (.jobs[]?.with.minor_version) = "'"${{ github.event.inputs.minor_version }}"'"
+            # ' "$file"
             cat .github/workflows/altf-keycloak.yaml
           done
 
