@@ -56,7 +56,9 @@ on:
         description: "Minor version"
         required: true
         default: "01"
-
+permissions:
+  contents: write
+  actions: write
 jobs:
   update:
     runs-on: ubuntu-latest
