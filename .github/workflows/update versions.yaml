@@ -62,7 +62,7 @@ on:
 permissions:
   contents: write
 env:
-  branch_name: 'update-altf-versions-${{ github.run_number }}'
+  branch_name: update-altf-versions-${{ github.run_number }}
 jobs:
   update:
     runs-on: ubuntu-latest
