@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v5
-        sparse-checkout: '.github/workflows'
+
 
       - name: Update versions in altf workflows
         run: |
