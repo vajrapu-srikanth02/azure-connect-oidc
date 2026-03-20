@@ -74,11 +74,6 @@ jobs:
         with:
           token: ${{ secrets.GH_PATS }}
 
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
-
       - name: Update versions in altf workflows
         run: |
           for file in .github/workflows/${{ inputs.file }}; do
@@ -86,14 +81,11 @@ jobs:
 
             sed -i "s/major_version: '[^']*'/major_version: '${{ github.event.inputs.major_version }}'/" "$file"
             sed -i "s/minor_version: '[^']*'/minor_version: '${{ github.event.inputs.minor_version }}'/" "$file"
-            # yq -i --prettyPrint '
-            #   (.jobs[]?.with.major_version) = "'"${{ github.event.inputs.major_version }}"'" |
-            #   (.jobs[]?.with.minor_version) = "'"${{ github.event.inputs.minor_version }}"'"
-            # ' "$file"
             cat .github/workflows/altf-keycloak.yaml
           done
 
       - name: Create Pull Request
+        id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GH_PATS }}
@@ -127,17 +119,18 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PATS }}
           script: |
-            const prNumber = process.env.PR_NUMBER;
+            const prNumber = ${{ needs.update.outputs.pr_number }};
+            
             if (!prNumber) {
               core.setFailed("PR number not found");
               return;
             }
+              
+            console.log("Merging PR:", prNumber);
+
             await github.rest.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: prNumber,
               merge_method: "squash"
             });
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-
