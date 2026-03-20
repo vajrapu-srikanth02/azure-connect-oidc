@@ -1,0 +1,15 @@
+name: altf-keycloak
+run-name: ${{ inputs.comments }}
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  helm:
+    uses: 
+    if:
+    with:
+      chart_name: altf-keycloak
+      major_version: '26'
+      minor_version: '01'
